@@ -1,4 +1,8 @@
 import { Elysia, t } from "elysia";
+import { cookie } from '@elysiajs/cookie'
+
+import { cors } from '@elysiajs/cors'
+import { cron } from '@elysiajs/cron'
 // @ts-ignore
 import { PrismaClient } from '@prisma/client'
 const db = new PrismaClient()
@@ -6,7 +10,7 @@ const db = new PrismaClient()
 // @ts-ignore
 import { swagger } from "@elysiajs/swagger";
 import {pokemons} from "./pokemons";
-import process from "process";
+import {html} from "@elysiajs/html";
 
 
 
@@ -94,11 +98,21 @@ import process from "process";
 //     })
 //     .listen(3000);
 
-// * WITH DB PRISMA/POSTGRESQL //
+// * WITH DB PRISMA/MONGODB//
 // @ts-ignore
 // @ts-ignore
+// @ts-ignore
+
+
+
+// Plugins CRONS -> script programmer executer en arriere plan //
+
+// Plugins CORS //
+
+// PLUGINS COOKIES to update //
 new Elysia()
-    .get("/", () => "Hello")
+    .use(html())
+    .get("/", () => Bun.file("./public/index.html").text())
     .get("/pokemons", async()=>{
         const pokemons = await db.pokemons.findMany();
         return pokemons
@@ -150,11 +164,50 @@ new Elysia()
         })
         return pokemons
     })
+    .post('/cookies', ({ cookie: { name } }) => {
+    // Get
+    name.value
+
+    // Set
+    name.value = "New Value"
+    name.value = {
+        hello: 'world'
+    }
+})
+    .get('/deletecookie', ({ cookie, cookie: { name } }) => {
+    name.remove()
+
+    delete cookie.name
+})
+.get('/cookie', ({ cookie: { name } }) => {
+    // Set
+    name.value = {
+        id: 617,
+        name: 'test cookie'
+    }
+}, {
+    cookie: t.Cookie({
+        value: t.Object({
+            id: t.Numeric(),
+            name: t.String()
+        })
+    })
+})
+    .use(
+        cron({
+            name: 'cron test',
+            pattern: '*/10 * * * * *',
+            run() {
+                console.log('test cron')
+            }
+        })
+    )
+    .use(cors())
     .listen(3000)
 
+// @ts-ignore
+// @ts-ignore
 
 
-// // @ts-ignore
-// console.log(
-//     `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-// )
+
+
