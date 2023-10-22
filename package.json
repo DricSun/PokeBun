@@ -9,6 +9,7 @@
     "@elysiajs/html": "^0.7.3",
     "@elysiajs/swagger": "^0.7.3",
     "@prisma/client": "^5.4.2",
+    "@types/node": "^20.8.7",
     "elysia": "latest"
   },
   "devDependencies": {
